@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -6,7 +6,7 @@ import { useControls, button } from 'leva';
 import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
 import TerminalBand from './TerminalBand';
-import Choreography from './Choreography';
+import Choreography, { DESKTOP_LAYOUT, MOBILE_LAYOUT } from './Choreography';
 import useFocusMode from './useFocusMode';
 
 // ── Rich gradient backgrounds ───────────────────────────────────────
@@ -114,7 +114,7 @@ function BandScene({ bgIndex, chrome, reveal, trigger }) {
 
 // ── Choreography view — living breathing terminals ───────────────────
 
-function ChoreographyScene({ bgIndex, chrome, reveal }) {
+function ChoreographyScene({ bgIndex, chrome, reveal, isMobile }) {
   const bg = BACKGROUNDS[bgIndex];
   const { focusedSlot, setFocus, clearFocus } = useFocusMode();
 
@@ -123,6 +123,7 @@ function ChoreographyScene({ bgIndex, chrome, reveal }) {
       <color attach="background" args={[bg.threeColor]} />
 
       <Choreography
+        layout={isMobile ? MOBILE_LAYOUT : DESKTOP_LAYOUT}
         onSlotClick={(slot) => focusedSlot ? clearFocus() : setFocus(slot)}
         distortion={chrome.distortion}
         glow={chrome.glow}
@@ -145,10 +146,21 @@ function ChoreographyScene({ bgIndex, chrome, reveal }) {
 
 const VIEW_MODES = ['choreo', 'band', 'single'];
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 function App() {
   const [bgIndex, setBgIndex] = useState(0);
   const [viewIndex, setViewIndex] = useState(0);
   const [trigger, setTrigger] = useState(0);
+  const isMobile = useIsMobile();
   const bg = BACKGROUNDS[bgIndex];
   const viewMode = VIEW_MODES[viewIndex];
 
@@ -183,6 +195,8 @@ function App() {
 
   const cameraConfig = viewMode === 'single'
     ? { position: [0, 0, 5], fov: 45 }
+    : isMobile
+    ? { position: [0, 0, 9], fov: 55 }
     : { position: [0, 0, 12], fov: 50 };
 
   return (
@@ -205,7 +219,7 @@ function App() {
         ) : viewMode === 'band' ? (
           <BandScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} trigger={trigger} />
         ) : (
-          <ChoreographyScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} />
+          <ChoreographyScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} isMobile={isMobile} />
         )}
       </Canvas>
     </div>

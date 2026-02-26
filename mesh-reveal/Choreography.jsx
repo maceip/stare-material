@@ -35,7 +35,8 @@ const TERMINAL_POOL = [
   { name: 'PROXY-6', status: 'ROUTE', link: '' },
 ];
 
-const SLOT_LAYOUT = [
+// Desktop layout (7 slots)
+const DESKTOP_LAYOUT = [
   { id: 0, x: -5.2, width: 1.6, height: 3.0, pinned: false },
   { id: 1, x: -3.2, width: 2.8, height: 3.4, pinned: true, role: 'marketing' },
   { id: 2, x: -0.8, width: 2.4, height: 2.6, pinned: false },
@@ -43,6 +44,14 @@ const SLOT_LAYOUT = [
   { id: 4, x: 3.8, width: 1.3, height: 1.8, pinned: true, role: 'email' },
   { id: 5, x: 5.2, width: 1.3, height: 1.8, pinned: false },
   { id: 6, x: 6.8, width: 2.4, height: 2.4, pinned: false },
+];
+
+// Mobile layout (4 slots — tighter, fewer terminals)
+const MOBILE_LAYOUT = [
+  { id: 0, x: -2.2, width: 2.4, height: 3.0, pinned: true, role: 'marketing' },
+  { id: 1, x: 0.6, width: 2.0, height: 2.4, pinned: false },
+  { id: 2, x: 2.8, width: 1.3, height: 1.8, pinned: true, role: 'email' },
+  { id: 3, x: -3.8, width: 1.2, height: 2.0, pinned: false },
 ];
 
 // ── Phases ───────────────────────────────────────────────────────────
@@ -270,7 +279,10 @@ function AnimatedSlot({
 
 // ── Choreography controller ──────────────────────────────────────────
 
+export { DESKTOP_LAYOUT, MOBILE_LAYOUT };
+
 export default function Choreography({
+  layout = DESKTOP_LAYOUT,
   baselineY = -1.5,
   onSlotClick,
   distortion = 0.6,
@@ -284,7 +296,7 @@ export default function Choreography({
   revealGlowIntensity = 2.0,
 }) {
   const [slotStates, setSlotStates] = useState(() =>
-    SLOT_LAYOUT.map((slot, i) => ({
+    layout.map((slot, i) => ({
       terminalIndex: i % TERMINAL_POOL.length,
       phase: PHASE.ARRIVING,
       revealTrigger: 0,
@@ -293,7 +305,7 @@ export default function Choreography({
   );
 
   const scheduleRef = useRef(null);
-  const nextTerminalRef = useRef(SLOT_LAYOUT.length % TERMINAL_POOL.length);
+  const nextTerminalRef = useRef(layout.length % TERMINAL_POOL.length);
 
   const getNextTerminal = useCallback(() => {
     const idx = nextTerminalRef.current;
@@ -331,7 +343,7 @@ export default function Choreography({
     if (scheduleRef.current) return;
     scheduleRef.current = true;
 
-    const cyclableSlots = SLOT_LAYOUT
+    const cyclableSlots = layout
       .map((s, i) => ({ ...s, index: i }))
       .filter((s) => !s.pinned);
 
@@ -358,7 +370,7 @@ export default function Choreography({
 
   return (
     <group>
-      {SLOT_LAYOUT.map((slot, i) => {
+      {layout.map((slot, i) => {
         const state = slotStates[i];
         const terminal = slot.role === 'marketing'
           ? { name: 'STARE', status: 'LIVE', link: 'stare.network' }
