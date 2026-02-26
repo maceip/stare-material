@@ -48,10 +48,17 @@ export default function TerminalBand({
   baselineY = -1.5,       // bottom of the band in world Y
   revealTrigger = 0,
   revealColor = '#FFBE18',
+  revealHotColor = '#ffffff',
   revealDuration = 2.5,
-  glassColor = '#0a2a1a',
-  glowColor = '#1a6b3a',
-  bodyColor = '#0a0a0f',
+  revealLineCount = 80,
+  revealGlowIntensity = 2.0,
+  // Glass surface props (passed to all terminals)
+  distortion = 0.6,
+  glow = 0.5,
+  baseColorA = '#050808',
+  baseColorB = '#0a1a12',
+  accentColor = '#1a6b3a',
+  dotColor = '#1a6b3a',
 }) {
   return (
     <group>
@@ -64,9 +71,12 @@ export default function TerminalBand({
             <TerminalChrome
               width={slot.width}
               height={slot.height}
-              glassColor={glassColor}
-              glowColor={glowColor}
-              bodyColor={bodyColor}
+              distortion={distortion}
+              glow={glow}
+              baseColorA={baseColorA}
+              baseColorB={baseColorB}
+              accentColor={accentColor}
+              dotColor={dotColor}
               name={slot.name}
               status={slot.status}
               link={slot.link || ''}
@@ -75,7 +85,10 @@ export default function TerminalBand({
                 width={slot.width}
                 height={slot.height}
                 color={revealColor}
-                duration={revealDuration + i * 0.3} // stagger reveals
+                hotColor={revealHotColor}
+                duration={revealDuration + i * 0.3}
+                lineCount={revealLineCount}
+                glowIntensity={revealGlowIntensity}
                 trigger={revealTrigger}
                 position={[0, 0, 0.002]}
               />

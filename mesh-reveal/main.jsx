@@ -1,11 +1,11 @@
-import { StrictMode, useState, useMemo } from 'react';
+import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useControls, button } from 'leva';
-import * as THREE from 'three';
 import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
+import TerminalBand from './TerminalBand';
 
 // ── Rich gradient backgrounds ───────────────────────────────────────
 
@@ -42,31 +42,10 @@ const BACKGROUNDS = [
   },
 ];
 
-function Scene({ bgIndex }) {
-  const [trigger, setTrigger] = useState(0);
+// ── Single terminal view ─────────────────────────────────────────────
+
+function SingleScene({ bgIndex, chrome, reveal, trigger }) {
   const bg = BACKGROUNDS[bgIndex];
-
-  const chrome = useControls('Glass Surface', {
-    distortion: { value: 0.6, min: 0, max: 1.5, step: 0.05 },
-    glow: { value: 0.5, min: 0, max: 2, step: 0.05 },
-    baseColorA: '#050808',
-    baseColorB: '#0a1a12',
-    accentColor: '#1a6b3a',
-    dotColor: '#1a6b3a',
-  });
-
-  const reveal = useControls('Reveal', {
-    color: '#FFBE18',
-    hotColor: '#ffffff',
-    duration: { value: 2.5, min: 0.5, max: 8, step: 0.1 },
-    lineCount: { value: 80, min: 10, max: 200, step: 1 },
-    glowIntensity: { value: 2.0, min: 0.5, max: 5.0, step: 0.1 },
-  });
-
-  useControls('Actions', {
-    'Replay Reveal': button(() => setTrigger((t) => t + 1)),
-  });
-
   const w = 4.5;
   const h = 2.8;
 
@@ -102,15 +81,76 @@ function Scene({ bgIndex }) {
   );
 }
 
+// ── Band view — multiple terminals ───────────────────────────────────
+
+function BandScene({ bgIndex, chrome, reveal, trigger }) {
+  const bg = BACKGROUNDS[bgIndex];
+
+  return (
+    <>
+      <color attach="background" args={[bg.threeColor]} />
+
+      <TerminalBand
+        revealTrigger={trigger}
+        revealColor={reveal.color}
+        revealHotColor={reveal.hotColor}
+        revealDuration={reveal.duration}
+        revealLineCount={reveal.lineCount}
+        revealGlowIntensity={reveal.glowIntensity}
+        distortion={chrome.distortion}
+        glow={chrome.glow}
+        baseColorA={chrome.baseColorA}
+        baseColorB={chrome.baseColorB}
+        accentColor={chrome.accentColor}
+        dotColor={chrome.dotColor}
+      />
+
+      <OrbitControls makeDefault />
+    </>
+  );
+}
+
+// ── App ──────────────────────────────────────────────────────────────
+
 function App() {
   const [bgIndex, setBgIndex] = useState(0);
+  const [viewMode, setViewMode] = useState('band'); // 'single' | 'band'
+  const [trigger, setTrigger] = useState(0);
   const bg = BACKGROUNDS[bgIndex];
 
   const cycleBg = () => setBgIndex((i) => (i + 1) % BACKGROUNDS.length);
+  const toggleView = () => setViewMode((m) => m === 'single' ? 'band' : 'single');
 
   useControls('Background', {
     [`Current: ${bg.name}`]: button(cycleBg),
   });
+
+  const chrome = useControls('Glass Surface', {
+    distortion: { value: 0.6, min: 0, max: 1.5, step: 0.05 },
+    glow: { value: 0.5, min: 0, max: 2, step: 0.05 },
+    baseColorA: '#050808',
+    baseColorB: '#0a1a12',
+    accentColor: '#1a6b3a',
+    dotColor: '#1a6b3a',
+  });
+
+  const reveal = useControls('Reveal', {
+    color: '#FFBE18',
+    hotColor: '#ffffff',
+    duration: { value: 2.5, min: 0.5, max: 8, step: 0.1 },
+    lineCount: { value: 80, min: 10, max: 200, step: 1 },
+    glowIntensity: { value: 2.0, min: 0.5, max: 5.0, step: 0.1 },
+  });
+
+  useControls('Actions', {
+    'Replay Reveal': button(() => setTrigger((t) => t + 1)),
+    [`View: ${viewMode.toUpperCase()}`]: button(toggleView),
+  });
+
+  // Camera for band needs to be further back to see all terminals
+  const cameraConfig = viewMode === 'band'
+    ? { position: [0, 0, 12], fov: 50 }
+    : { position: [0, 0, 5], fov: 45 };
 
   return (
     <div
@@ -122,11 +162,16 @@ function App() {
       }}
     >
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 45 }}
+        key={viewMode} // force remount on view change for camera reset
+        camera={cameraConfig}
         gl={{ antialias: true, alpha: true }}
         style={{ background: 'transparent' }}
       >
-        <Scene bgIndex={bgIndex} />
+        {viewMode === 'single' ? (
+          <SingleScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} trigger={trigger} />
+        ) : (
+          <BandScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} trigger={trigger} />
+        )}
       </Canvas>
     </div>
   );
