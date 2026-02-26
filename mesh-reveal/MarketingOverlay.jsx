@@ -88,11 +88,12 @@ export default function MarketingOverlay({ width = 2.8, height = 3.4 }) {
     <Html
       center
       position={[0, 0, 0.004]}
+      distanceFactor={8}
       style={{
         width: `${pxW}px`,
         height: `${pxH}px`,
+        overflow: 'hidden',
       }}
-      transform={false}
     >
       <div style={styles.container}>
         <span style={styles.badge}>STARE.NETWORK</span>

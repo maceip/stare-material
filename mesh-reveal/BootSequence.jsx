@@ -132,8 +132,12 @@ export default function BootSequence({
     <Html
       center
       position={[0, 0, 0.004]}
-      style={{ width: `${pxW}px`, height: `${pxH}px` }}
-      transform={false}
+      distanceFactor={8}
+      style={{
+        width: `${pxW}px`,
+        height: `${pxH}px`,
+        overflow: 'hidden',
+      }}
     >
       <div
         style={{

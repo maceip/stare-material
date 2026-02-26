@@ -89,11 +89,12 @@ export default function EmailCapture({ width = 1.3, height = 1.8 }) {
     <Html
       center
       position={[0, 0, 0.004]}
+      distanceFactor={8}
       style={{
         width: `${pxW}px`,
         height: `${pxH}px`,
+        overflow: 'hidden',
       }}
-      transform={false}
     >
       <div style={styles.container}>
         <span style={styles.label}>Join the Network</span>
