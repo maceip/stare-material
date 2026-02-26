@@ -11,34 +11,34 @@ import ScanlineReveal from './ScanlineReveal';
 
 const BACKGROUNDS = [
   {
-    name: 'Deep Navy',
-    css: 'linear-gradient(135deg, #0a0e27 0%, #1a1f3a 40%, #0d1225 100%)',
-    threeColor: '#0d1225',
+    name: 'Cool Gray',
+    css: 'linear-gradient(160deg, #e8e8ec 0%, #d4d4da 50%, #e0e0e6 100%)',
+    threeColor: '#dcdce0',
   },
   {
-    name: 'Warm Charcoal',
-    css: 'linear-gradient(160deg, #1a1510 0%, #2a2018 35%, #1a1510 100%)',
-    threeColor: '#1a1510',
+    name: 'Warm Gray',
+    css: 'linear-gradient(155deg, #e6e4e0 0%, #d8d4d0 45%, #e2e0dc 100%)',
+    threeColor: '#dcd8d4',
   },
   {
-    name: 'Slate Dusk',
-    css: 'linear-gradient(145deg, #1c1f2e 0%, #2a2d3e 50%, #181b28 100%)',
-    threeColor: '#1c1f2e',
+    name: 'Neutral',
+    css: 'linear-gradient(150deg, #e4e4e4 0%, #d0d0d0 50%, #dedede 100%)',
+    threeColor: '#d8d8d8',
   },
   {
-    name: 'Graphite',
-    css: 'linear-gradient(170deg, #1e1e24 0%, #28282f 40%, #18181e 100%)',
-    threeColor: '#1e1e24',
+    name: 'Fog',
+    css: 'linear-gradient(145deg, #eaeaee 0%, #d6d6dc 40%, #e2e2e8 100%)',
+    threeColor: '#e0e0e4',
   },
   {
-    name: 'Midnight Forest',
-    css: 'linear-gradient(140deg, #0a1610 0%, #142218 40%, #0a1610 100%)',
-    threeColor: '#0f1a12',
+    name: 'Stone',
+    css: 'linear-gradient(160deg, #dcdad6 0%, #ccc8c4 45%, #d8d6d2 100%)',
+    threeColor: '#d4d0cc',
   },
   {
-    name: 'Obsidian Bronze',
-    css: 'linear-gradient(155deg, #1a1612 0%, #2a2218 35%, #16120e 100%)',
-    threeColor: '#1a1612',
+    name: 'Overcast',
+    css: 'linear-gradient(140deg, #e0e2e6 0%, #d2d4da 50%, #dcdee4 100%)',
+    threeColor: '#d8dade',
   },
 ];
 

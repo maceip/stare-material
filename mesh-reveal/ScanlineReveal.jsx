@@ -155,11 +155,16 @@ void main() {
   // Wider warm glow behind the hot edge
   float warmGlow = smoothstep(0.04, -0.01, dist) * smoothstep(-0.15, -0.04, dist);
 
+  // After the sweep passes, fade the solid fill to let the glass surface show through
+  // The further behind the sweep edge, the more transparent we become
+  float fadeOut = smoothstep(-0.3, -0.8, dist); // starts fading well behind sweep
+
   vec3 col = uBgColor;
   col = mix(col, uColor * 0.3, warmGlow);
   col = mix(col, mix(uColor, uHotColor, 0.5), edgeBand * 0.7);
 
-  float alpha = fill * 0.94;
+  // Full opacity at the edge, fading to near-transparent behind
+  float alpha = fill * mix(0.92, 0.08, fadeOut);
 
   gl_FragColor = vec4(col, alpha);
 }
