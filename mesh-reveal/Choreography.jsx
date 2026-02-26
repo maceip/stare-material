@@ -17,6 +17,7 @@ import gsap from 'gsap';
 import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
 import MarketingOverlay from './MarketingOverlay';
+import EmailCapture from './EmailCapture';
 
 // ── Slot definitions ─────────────────────────────────────────────────
 
@@ -35,10 +36,10 @@ const TERMINAL_POOL = [
 
 const SLOT_LAYOUT = [
   { id: 0, x: -5.2, width: 1.6, height: 3.0, pinned: false },
-  { id: 1, x: -3.2, width: 2.8, height: 3.4, pinned: true },  // MARKETING — no cycle
+  { id: 1, x: -3.2, width: 2.8, height: 3.4, pinned: true, role: 'marketing' },
   { id: 2, x: -0.8, width: 2.4, height: 2.6, pinned: false },
   { id: 3, x: 1.8, width: 2.2, height: 2.0, pinned: false },
-  { id: 4, x: 3.8, width: 1.3, height: 1.8, pinned: false },
+  { id: 4, x: 3.8, width: 1.3, height: 1.8, pinned: true, role: 'email' },
   { id: 5, x: 5.2, width: 1.3, height: 1.8, pinned: false },
   { id: 6, x: 6.8, width: 2.4, height: 2.4, pinned: false },
 ];
@@ -79,7 +80,7 @@ function AnimatedSlot({
   departureTrigger,
   onDepartureComplete,
   onArrivalComplete,
-  isMarketing,
+  role,
   distortion, glow, baseColorA, baseColorB, accentColor, dotColor,
   revealColor, revealHotColor, revealGlowIntensity,
 }) {
@@ -238,8 +239,12 @@ function AnimatedSlot({
           />
         )}
         {/* Marketing copy overlay */}
-        {isMarketing && (
+        {role === 'marketing' && (
           <MarketingOverlay width={slot.width} height={slot.height} />
+        )}
+        {/* Email capture overlay */}
+        {role === 'email' && (
+          <EmailCapture width={slot.width} height={slot.height} />
         )}
       </TerminalChrome>
     </group>
@@ -337,8 +342,10 @@ export default function Choreography({
     <group>
       {SLOT_LAYOUT.map((slot, i) => {
         const state = slotStates[i];
-        const terminal = slot.pinned
+        const terminal = slot.role === 'marketing'
           ? { name: 'STARE', status: 'LIVE', link: 'stare.network' }
+          : slot.role === 'email'
+          ? { name: 'JOIN', status: 'OPEN', link: '' }
           : TERMINAL_POOL[state.terminalIndex];
 
         return (
@@ -352,7 +359,7 @@ export default function Choreography({
             departureTrigger={state.departureTrigger}
             onDepartureComplete={handleDepartureComplete}
             onArrivalComplete={handleArrivalComplete}
-            isMarketing={slot.pinned}
+            role={slot.role}
             distortion={distortion}
             glow={glow}
             baseColorA={baseColorA}
