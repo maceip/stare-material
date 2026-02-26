@@ -16,6 +16,7 @@ import { useFrame } from '@react-three/fiber';
 import gsap from 'gsap';
 import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
+import MarketingOverlay from './MarketingOverlay';
 
 // ── Slot definitions ─────────────────────────────────────────────────
 
@@ -78,6 +79,7 @@ function AnimatedSlot({
   departureTrigger,
   onDepartureComplete,
   onArrivalComplete,
+  isMarketing,
   distortion, glow, baseColorA, baseColorB, accentColor, dotColor,
   revealColor, revealHotColor, revealGlowIntensity,
 }) {
@@ -235,6 +237,10 @@ function AnimatedSlot({
             position={[0, 0, 0.002]}
           />
         )}
+        {/* Marketing copy overlay */}
+        {isMarketing && (
+          <MarketingOverlay width={slot.width} height={slot.height} />
+        )}
       </TerminalChrome>
     </group>
   );
@@ -346,6 +352,7 @@ export default function Choreography({
             departureTrigger={state.departureTrigger}
             onDepartureComplete={handleDepartureComplete}
             onArrivalComplete={handleArrivalComplete}
+            isMarketing={slot.pinned}
             distortion={distortion}
             glow={glow}
             baseColorA={baseColorA}
