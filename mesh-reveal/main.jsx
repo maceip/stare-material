@@ -7,6 +7,7 @@ import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
 import TerminalBand from './TerminalBand';
 import Choreography from './Choreography';
+import useFocusMode from './useFocusMode';
 
 // ── Rich gradient backgrounds ───────────────────────────────────────
 
@@ -115,12 +116,14 @@ function BandScene({ bgIndex, chrome, reveal, trigger }) {
 
 function ChoreographyScene({ bgIndex, chrome, reveal }) {
   const bg = BACKGROUNDS[bgIndex];
+  const { focusedSlot, setFocus, clearFocus } = useFocusMode();
 
   return (
     <>
       <color attach="background" args={[bg.threeColor]} />
 
       <Choreography
+        onSlotClick={(slot) => focusedSlot ? clearFocus() : setFocus(slot)}
         distortion={chrome.distortion}
         glow={chrome.glow}
         baseColorA={chrome.baseColorA}
@@ -132,7 +135,8 @@ function ChoreographyScene({ bgIndex, chrome, reveal }) {
         revealGlowIntensity={reveal.glowIntensity}
       />
 
-      <OrbitControls makeDefault />
+      {/* OrbitControls disabled during focus to prevent conflicts */}
+      {!focusedSlot && <OrbitControls makeDefault />}
     </>
   );
 }

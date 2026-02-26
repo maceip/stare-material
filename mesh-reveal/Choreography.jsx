@@ -18,6 +18,7 @@ import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
 import MarketingOverlay from './MarketingOverlay';
 import EmailCapture from './EmailCapture';
+import BootSequence from './BootSequence';
 
 // ── Slot definitions ─────────────────────────────────────────────────
 
@@ -81,6 +82,7 @@ function AnimatedSlot({
   onDepartureComplete,
   onArrivalComplete,
   role,
+  onSlotClick,
   distortion, glow, baseColorA, baseColorB, accentColor, dotColor,
   revealColor, revealHotColor, revealGlowIntensity,
 }) {
@@ -197,7 +199,13 @@ function AnimatedSlot({
   const isDeparting = phase === PHASE.DEPARTING;
 
   return (
-    <group ref={groupRef} position={[slot.x, restY, 0]}>
+    <group
+      ref={groupRef}
+      position={[slot.x, restY, 0]}
+      onClick={(e) => { e.stopPropagation(); onSlotClick?.(slot); }}
+      onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+      onPointerOut={() => { document.body.style.cursor = 'default'; }}
+    >
       <TerminalChrome
         width={slot.width}
         height={slot.height}
@@ -246,6 +254,15 @@ function AnimatedSlot({
         {role === 'email' && (
           <EmailCapture width={slot.width} height={slot.height} />
         )}
+        {/* Boot sequence for regular terminals */}
+        {!role && phase !== PHASE.DEPARTING && (
+          <BootSequence
+            width={slot.width}
+            height={slot.height}
+            name={terminal.name}
+            delay={phase === PHASE.ARRIVING ? ARRIVAL_ARC_DURATION + 0.5 : 0.2}
+          />
+        )}
       </TerminalChrome>
     </group>
   );
@@ -255,6 +272,7 @@ function AnimatedSlot({
 
 export default function Choreography({
   baselineY = -1.5,
+  onSlotClick,
   distortion = 0.6,
   glow = 0.5,
   baseColorA = '#050808',
@@ -360,6 +378,7 @@ export default function Choreography({
             onDepartureComplete={handleDepartureComplete}
             onArrivalComplete={handleArrivalComplete}
             role={slot.role}
+            onSlotClick={onSlotClick}
             distortion={distortion}
             glow={glow}
             baseColorA={baseColorA}
