@@ -1,26 +1,58 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useState, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useControls, button } from 'leva';
+import * as THREE from 'three';
 import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
 
-function Scene() {
+// ── Rich gradient backgrounds ───────────────────────────────────────
+
+const BACKGROUNDS = [
+  {
+    name: 'Deep Navy',
+    css: 'linear-gradient(135deg, #0a0e27 0%, #1a1f3a 40%, #0d1225 100%)',
+    threeColor: '#0d1225',
+  },
+  {
+    name: 'Warm Charcoal',
+    css: 'linear-gradient(160deg, #1a1510 0%, #2a2018 35%, #1a1510 100%)',
+    threeColor: '#1a1510',
+  },
+  {
+    name: 'Slate Dusk',
+    css: 'linear-gradient(145deg, #1c1f2e 0%, #2a2d3e 50%, #181b28 100%)',
+    threeColor: '#1c1f2e',
+  },
+  {
+    name: 'Graphite',
+    css: 'linear-gradient(170deg, #1e1e24 0%, #28282f 40%, #18181e 100%)',
+    threeColor: '#1e1e24',
+  },
+  {
+    name: 'Midnight Forest',
+    css: 'linear-gradient(140deg, #0a1610 0%, #142218 40%, #0a1610 100%)',
+    threeColor: '#0f1a12',
+  },
+  {
+    name: 'Obsidian Bronze',
+    css: 'linear-gradient(155deg, #1a1612 0%, #2a2218 35%, #16120e 100%)',
+    threeColor: '#1a1612',
+  },
+];
+
+function Scene({ bgIndex }) {
   const [trigger, setTrigger] = useState(0);
+  const bg = BACKGROUNDS[bgIndex];
 
-  const chrome = useControls('Chrome', {
-    bezelMode: { value: 'custom', options: ['fluted', 'custom'] },
-    glassColor: '#0a2a1a',
-    glowColor: '#1a6b3a',
-    bodyColor: '#101018',
-    bezelWidth: { value: 0.06, min: 0.02, max: 0.2, step: 0.005 },
-  });
-
-  const fluted = useControls('Fluted Glass', {
-    distortion: { value: 0.8, min: 0, max: 1.5, step: 0.05 },
-    fill: { value: 0.3, min: 0, max: 1, step: 0.05 },
-    glow: { value: 0.8, min: 0, max: 2, step: 0.05 },
+  const chrome = useControls('Glass Surface', {
+    distortion: { value: 0.6, min: 0, max: 1.5, step: 0.05 },
+    glow: { value: 0.5, min: 0, max: 2, step: 0.05 },
+    baseColorA: '#050808',
+    baseColorB: '#0a1a12',
+    accentColor: '#1a6b3a',
+    dotColor: '#1a6b3a',
   });
 
   const reveal = useControls('Reveal', {
@@ -40,19 +72,17 @@ function Scene() {
 
   return (
     <>
+      <color attach="background" args={[bg.threeColor]} />
+
       <TerminalChrome
         width={w}
         height={h}
-        bezelMode={chrome.bezelMode}
-        bezelWidth={chrome.bezelWidth}
-        glassColor={chrome.glassColor}
-        glowColor={chrome.glowColor}
-        bodyColor={chrome.bodyColor}
-        flutedConfig={{
-          distortion: fluted.distortion,
-          fill: fluted.fill,
-          glow: fluted.glow,
-        }}
+        distortion={chrome.distortion}
+        glow={chrome.glow}
+        baseColorA={chrome.baseColorA}
+        baseColorB={chrome.baseColorB}
+        accentColor={chrome.accentColor}
+        dotColor={chrome.dotColor}
       >
         <ScanlineReveal
           width={w}
@@ -72,16 +102,38 @@ function Scene() {
   );
 }
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <div style={{ width: '100vw', height: '100vh' }}>
+function App() {
+  const [bgIndex, setBgIndex] = useState(0);
+  const bg = BACKGROUNDS[bgIndex];
+
+  const cycleBg = () => setBgIndex((i) => (i + 1) % BACKGROUNDS.length);
+
+  useControls('Background', {
+    [`Current: ${bg.name}`]: button(cycleBg),
+  });
+
+  return (
+    <div
+      style={{
+        width: '100vw',
+        height: '100vh',
+        background: bg.css,
+        transition: 'background 0.8s ease',
+      }}
+    >
       <Canvas
         camera={{ position: [0, 0, 5], fov: 45 }}
-        gl={{ antialias: true, alpha: false }}
+        gl={{ antialias: true, alpha: true }}
+        style={{ background: 'transparent' }}
       >
-        <color attach="background" args={['#ffffff']} />
-        <Scene />
+        <Scene bgIndex={bgIndex} />
       </Canvas>
     </div>
+  );
+}
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
   </StrictMode>
 );
