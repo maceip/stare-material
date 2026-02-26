@@ -6,6 +6,7 @@ import { useControls, button } from 'leva';
 import TerminalChrome from './TerminalChrome';
 import ScanlineReveal from './ScanlineReveal';
 import TerminalBand from './TerminalBand';
+import Choreography from './Choreography';
 
 // ── Rich gradient backgrounds ───────────────────────────────────────
 
@@ -110,16 +111,45 @@ function BandScene({ bgIndex, chrome, reveal, trigger }) {
   );
 }
 
+// ── Choreography view — living breathing terminals ───────────────────
+
+function ChoreographyScene({ bgIndex, chrome, reveal }) {
+  const bg = BACKGROUNDS[bgIndex];
+
+  return (
+    <>
+      <color attach="background" args={[bg.threeColor]} />
+
+      <Choreography
+        distortion={chrome.distortion}
+        glow={chrome.glow}
+        baseColorA={chrome.baseColorA}
+        baseColorB={chrome.baseColorB}
+        accentColor={chrome.accentColor}
+        dotColor={chrome.dotColor}
+        revealColor={reveal.color}
+        revealHotColor={reveal.hotColor}
+        revealGlowIntensity={reveal.glowIntensity}
+      />
+
+      <OrbitControls makeDefault />
+    </>
+  );
+}
+
 // ── App ──────────────────────────────────────────────────────────────
+
+const VIEW_MODES = ['choreo', 'band', 'single'];
 
 function App() {
   const [bgIndex, setBgIndex] = useState(0);
-  const [viewMode, setViewMode] = useState('band'); // 'single' | 'band'
+  const [viewIndex, setViewIndex] = useState(0);
   const [trigger, setTrigger] = useState(0);
   const bg = BACKGROUNDS[bgIndex];
+  const viewMode = VIEW_MODES[viewIndex];
 
   const cycleBg = () => setBgIndex((i) => (i + 1) % BACKGROUNDS.length);
-  const toggleView = () => setViewMode((m) => m === 'single' ? 'band' : 'single');
+  const cycleView = () => setViewIndex((i) => (i + 1) % VIEW_MODES.length);
 
   useControls('Background', {
     [`Current: ${bg.name}`]: button(cycleBg),
@@ -144,13 +174,12 @@ function App() {
 
   useControls('Actions', {
     'Replay Reveal': button(() => setTrigger((t) => t + 1)),
-    [`View: ${viewMode.toUpperCase()}`]: button(toggleView),
+    [`View: ${viewMode.toUpperCase()}`]: button(cycleView),
   });
 
-  // Camera for band needs to be further back to see all terminals
-  const cameraConfig = viewMode === 'band'
-    ? { position: [0, 0, 12], fov: 50 }
-    : { position: [0, 0, 5], fov: 45 };
+  const cameraConfig = viewMode === 'single'
+    ? { position: [0, 0, 5], fov: 45 }
+    : { position: [0, 0, 12], fov: 50 };
 
   return (
     <div
@@ -162,15 +191,17 @@ function App() {
       }}
     >
       <Canvas
-        key={viewMode} // force remount on view change for camera reset
+        key={viewMode}
         camera={cameraConfig}
         gl={{ antialias: true, alpha: true }}
         style={{ background: 'transparent' }}
       >
         {viewMode === 'single' ? (
           <SingleScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} trigger={trigger} />
-        ) : (
+        ) : viewMode === 'band' ? (
           <BandScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} trigger={trigger} />
+        ) : (
+          <ChoreographyScene bgIndex={bgIndex} chrome={chrome} reveal={reveal} />
         )}
       </Canvas>
     </div>
